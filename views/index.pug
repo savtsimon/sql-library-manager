@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  h1= title
+  p
+    a(href="/books/new", class="button") Create New Book
+  if books.length > 0
+    table 
+      thead
+        tr
+          th Title 
+          th Author 
+          th Genre 
+          th Years 
+      tbody
+        each book in books 
+          tr
+            td
+              a(href=`/books/${book.id}`)= book.title
+            td= book.author
+            td= book.genre
+            td= book.year
+    ul
+      - let n = 1
+      while n <= buttons
+        a(href=`/books?pageNum=${n}` class="button")= n++
+  else
+    br
+    p Sorry, no books match your search!
+    p
+      a(class="button" href="/books") Home

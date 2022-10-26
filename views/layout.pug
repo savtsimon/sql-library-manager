@@ -1,0 +1,12 @@
+doctype html
+html
+  head
+    title= title
+    link(rel="stylesheet", href="/stylesheets/style.css")
+  body
+    form(action="/books" method="post") 
+      p
+        label(for="search")
+        input(name="search" type="text" id="search" placeholder="Search")
+        input(type="submit" value="Search" style="margin-left: 0px")
+    block content
