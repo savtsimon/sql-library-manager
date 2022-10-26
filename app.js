@@ -21,7 +21,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -36,6 +35,7 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
+  // Based on error status, render appropriate page
   if (err.status === 404) {
     res.render("page-not-found")
   } else {
@@ -45,6 +45,7 @@ app.use(function (err, req, res, next) {
 
 (async () => {
   try {
+    // Authenticate connection to database
     await db.sequelize.authenticate()
     console.log('Connection to the database successful!');
     await db.sequelize.sync()

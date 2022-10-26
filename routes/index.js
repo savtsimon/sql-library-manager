@@ -9,8 +9,8 @@ function asyncHandler(cb) {
   return async (req, res, next) => {
     try {
       await cb(req, res, next)
-    } catch (err) {
-      next(err)
+    } catch (error) {
+      next(error)
     }
   }
 }
@@ -25,6 +25,7 @@ router.get('/', (req, res, next) => {
 router.get("/books", asyncHandler(async (req, res, next) => {
   let booksPerPage = 10
   let numBooks = await Book.count()
+  // Calculate number of pagination buttons
   let buttons = Math.ceil(numBooks / booksPerPage)
   // Check if a pageNum exists in query string, if not set the pageNum to default 1
   const pageNum = req.query.pageNum ?? 1
@@ -35,18 +36,19 @@ router.get("/books", asyncHandler(async (req, res, next) => {
     })
     res.render("index", { books, title: "Books", buttons })
   } else {
-    res.render("page-not-found")
+    throw new Error()
   }
 }))
 
 /* POST find searched books. */
 router.post("/books", asyncHandler(async (req, res, next) => {
-  console.log(req.body.search)
   const books = await Book.findAll({
     where: {
+      // Use operation "or" to check title, author, genre, and year for search matches
       [Op.or]: [
         {
           title: {
+            // Use operation "like" to find if search term contained in title
             [Op.like]: '%' + req.body.search + '%'
           }
         },
@@ -84,11 +86,13 @@ router.post("/books/new", asyncHandler(async (req, res, next) => {
     book = await Book.create(req.body)
     res.redirect("/books/")
   } catch (error) {
+    // If errors are from the Book model validation, display the errors
     if (error.name === "SequelizeValidationError") {
+      // Use build to capture the unsaved state of the book for display
       book = await Book.build(req.body)
       res.render("new-book", { book, errors: error.errors, title: "New Book" })
     } else {
-      throw error
+      throw error;
     }
   }
 }))
@@ -99,7 +103,7 @@ router.get("/books/:id", asyncHandler(async (req, res, next) => {
   if (book) {
     res.render("update-book", { book, title: "Update Book" })
   } else {
-    res.status(404).render("page-not-found")
+    throw new Error()
   }
 }))
 
@@ -112,15 +116,17 @@ router.post("/books/:id", asyncHandler(async (req, res, next) => {
       await book.update(req.body)
       res.redirect("/books/")
     } else {
-      res.status(404).render("page-not-found")
+      throw new Error()
     }
   } catch (error) {
+    // If errors are from the Book model validation, display the errors
     if (error.name === "SequelizeValidationError") {
+      // Use build to capture the unsaved state of the book for display
       book = await Book.build(req.body)
       book.id = req.params.id
       res.render("update-book", { book, errors: error.errors, title: "Update Book" })
     } else {
-      throw error
+      throw error;
     }
   }
 }))
@@ -132,7 +138,7 @@ router.post("/books/:id/delete", asyncHandler(async (req, res, next) => {
     await book.destroy()
     res.redirect("/books")
   } else {
-    res.status(404).render("page-not-found")
+    throw new Error()
   }
 }))
 
